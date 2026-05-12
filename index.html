@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zakai Chemicals | Premium Cleaning Solutions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --dark-gold: #996515;
+            --black: #1a1a1a;
+            --dark-grey: #2d2d2d;
+            --white: #ffffff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--black); color: var(--white); line-height: 1.6; }
+
+        /* Header & Branding */
+        header {
+            background: linear-gradient(145deg, #000, #222);
+            padding: 2rem 1rem;
+            text-align: center;
+            border-bottom: 2px solid var(--gold);
+        }
+        h1 { font-family: 'Playfair Display', serif; color: var(--gold); font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px; }
+        .tagline { color: #ccc; font-style: italic; font-size: 0.9rem; }
+
+        /* Navigation/Filters */
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 1rem;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            background: var(--black);
+            z-index: 100;
+        }
+        .filter-btn {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .filter-btn.active, .filter-btn:hover { background: var(--gold); color: black; }
+
+        /* Product Grid */
+        .container { max-width: 1200px; margin: auto; padding: 1rem; }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+        }
+        .product-card {
+            background: var(--dark-grey);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #444;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+        .product-card img { width: 100%; height: 150px; object-fit: cover; }
+        .product-info { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; }
+        .p-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 5px; }
+        .p-price { color: var(--gold); font-weight: bold; margin-bottom: 8px; }
+        .p-desc { font-size: 0.75rem; color: #bbb; margin-bottom: 10px; }
+        .add-btn {
+            background: var(--gold);
+            color: black;
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: auto;
+        }
+
+        /* Cart Sidebar/Modal */
+        #cart-modal {
+            position: fixed; top: 0; right: -100%; width: 100%; max-width: 400px; height: 100%;
+            background: var(--dark-grey); z-index: 1000; transition: 0.4s; padding: 20px;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.5); overflow-y: auto;
+        }
+        #cart-modal.active { right: 0; }
+        .cart-header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--gold); padding-bottom: 10px; margin-bottom: 20px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        .qty-controls button { background: var(--gold); border: none; width: 25px; height: 25px; cursor: pointer; }
+        
+        /* Form Styling */
+        form input, form textarea {
+            width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #444; background: #1a1a1a; color: white;
+        }
+        .place-order-btn { background: #25D366; color: white; border: none; padding: 15px; width: 100%; font-weight: bold; border-radius: 5px; cursor: pointer; }
+
+        /* Floating Buttons */
+        .cart-fab {
+            position: fixed; bottom: 20px; right: 20px; background: var(--gold); color: black;
+            width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 999;
+        }
+        .wa-fab {
+            position: fixed; bottom: 90px; right: 20px; background: #25D366; color: white;
+            width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; z-index: 999; text-decoration: none; font-size: 24px;
+        }
+        #cart-count { position: absolute; top: 0; right: 0; background: red; color: white; border-radius: 50%; padding: 2px 7px; font-size: 12px; }
+
+        @media (min-width: 768px) {
+            .product-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>ZAKAI CHEMICALS</h1>
+    <p class="tagline">Premium cleaning products & quality plastic items in Karachi</p>
+</header>
+
+<div class="filters" id="filter-container">
+    <button class="filter-btn active" onclick="filterProducts('all')">All</button>
+    <button class="filter-btn" onclick="filterProducts('washing chemicals')">Chemicals</button>
+    <button class="filter-btn" onclick="filterProducts('plastic items')">Plastics</button>
+    <button class="filter-btn" onclick="filterProducts('general')">General</button>
+</div>
+
+<div class="container">
+    <div class="product-grid" id="product-display">
+        <!-- Products will be injected here by JS -->
+    </div>
+</div>
+
+<!-- Floating Buttons -->
+<a href="https://wa.me/923145197557" class="wa-fab" target="_blank">💬</a>
+<div class="cart-fab" onclick="toggleCart()">
+    🛒 <span id="cart-count">0</span>
+</div>
+
+<!-- Cart Modal -->
+<div id="cart-modal">
+    <div class="cart-header">
+        <h2>Your Cart</h2>
+        <button onclick="toggleCart()" style="background:none; border:none; color:var(--gold); font-size:1.5rem; cursor:pointer;">&times;</button>
+    </div>
+    <div id="cart-items-list"></div>
+    <div style="margin-top:20px; border-top:1px solid var(--gold); padding-top:10px;">
+        <h3 id="cart-total">Total: PKR 0</h3>
+    </div>
+
+    <!-- Checkout Form -->
+    <form id="order-form" action="https://formspree.io/f/mwvyyrkl" method="POST">
+        <input type="text" name="name" placeholder="Full Name" required>
+        <input type="tel" name="phone" placeholder="Phone Number (e.g. 0314...)" required>
+        <textarea name="address" rows="3" placeholder="Delivery Address in Karachi" required></textarea>
+        <textarea name="instructions" rows="2" placeholder="Special Instructions (Optional)"></textarea>
+        
+        <!-- Hidden field to store the formatted order summary -->
+        <input type="hidden" name="order_summary" id="hidden-summary">
+        <input type="hidden" name="_subject" value="New Order - Zakai Chemicals">
+
+        <button type="submit" class="place-order-btn">PLACE ORDER (EMAIL)</button>
+    </form>
+</div>
+
+<script>
+    const products = [
+        { id: 1, name: "Premium Washing Powder", price: 400, category: "washing chemicals", img: "https://i.ibb.co/LST6f8p/powder.jpg", desc: "Heavy duty dirt removal 1kg" },
+        { id: 2, name: "Hand Wash (500ml)", price: 250, category: "washing chemicals", img: "https://i.ibb.co/VMLpX6H/handwash.jpg", desc: "Antibacterial lemon scent" },
+        { id: 3, name: "Floor Cleaner", price: 350, category: "washing chemicals", img: "https://i.ibb.co/yYy4mF0/floor.jpg", desc: "Floral fragrance, 1 Litre" },
+        { id: 4, name: "Dish Wash Liquid", price: 180, category: "washing chemicals", img: "https://i.ibb.co/Xz9tMvj/dishwash.jpg", desc: "Cuts through grease instantly" },
+        { id: 5, name: "Plastic Bucket (Large)", price: 650, category: "plastic items", img: "https://i.ibb.co/7XjFqjL/bucket.jpg", desc: "Durable high-grade plastic" },
+        { id: 6, name: "Laundry Basket", price: 800, category: "plastic items", img: "https://i.ibb.co/mHq3z0r/basket.jpg", desc: "Ventilated design, stylish gold tint" },
+        { id: 7, name: "Plastic Storage Box", price: 450, category: "plastic items", img: "https://i.ibb.co/hK7YyYn/box.jpg", desc: "Transparent 10L capacity" },
+        { id: 8, name: "Bathroom Stool", price: 550, category: "plastic items", img: "https://i.ibb.co/0fV5Q4p/stool.jpg", desc: "Anti-slip heavy duty" },
+        { id: 9, name: "Bleach Gold Edition", price: 200, category: "washing chemicals", img: "https://i.ibb.co/FmP8rGz/bleach.jpg", desc: "Brightens whites perfectly" },
+        { id: 10, name: "Plastic Mugs (Set of 3)", price: 300, category: "plastic items", img: "https://i.ibb.co/R9m4Vv0/mugs.jpg", desc: "BPA free daily use" },
+        { id: 11, name: "Toilet Cleaner", price: 280, category: "washing chemicals", img: "https://i.ibb.co/vDndWb3/toilet.jpg", desc: "99.9% germ protection" },
+        { id: 12, name: "Softener/Conditioner", price: 450, category: "washing chemicals", img: "https://i.ibb.co/fQz7K1r/softener.jpg", desc: "Keeps clothes fresh and soft" }
+    ];
+
+    let cart = JSON.parse(localStorage.getItem('zakai_cart')) || [];
+
+    function initProducts() {
+        renderProducts(products);
+        updateCartUI();
+    }
+
+    function renderProducts(items) {
+        const display = document.getElementById('product-display');
+        display.innerHTML = items.map(p => `
+            <div class="product-card">
+                <img src="${p.img}" alt="${p.name}" loading="lazy">
+                <div class="product-info">
+                    <div class="p-name">${p.name}</div>
+                    <div class="p-price">PKR ${p.price}</div>
+                    <div class="p-desc">${p.desc}</div>
+                    <button class="add-btn" onclick="addToCart(${p.id})">Add to Cart</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function filterProducts(cat) {
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        const filtered = cat === 'all' ? products : products.filter(p => p.category === cat);
+        renderProducts(filtered);
+    }
+
+    function addToCart(id) {
+        const item = products.find(p => p.id === id);
+        const existing = cart.find(c => c.id === id);
+        if (existing) {
+            existing.qty++;
+        } else {
+            cart.push({ ...item, qty: 1 });
+        }
+        updateCartUI();
+        saveCart();
+    }
+
+    function changeQty(id, delta) {
+        const item = cart.find(c => c.id === id);
+        item.qty += delta;
+        if (item.qty <= 0) cart = cart.filter(c => c.id !== id);
+        updateCartUI();
+        saveCart();
+    }
+
+    function updateCartUI() {
+        const list = document.getElementById('cart-items-list');
+        const count = document.getElementById('cart-count');
+        const totalEl = document.getElementById('cart-total');
+        const hiddenSummary = document.getElementById('hidden-summary');
+
+        count.innerText = cart.reduce((acc, item) => acc + item.qty, 0);
+        
+        let total = 0;
+        let summaryText = "ORDER DETAILS:\n------------------\n";
+
+        list.innerHTML = cart.map(item => {
+            const subtotal = item.price * item.qty;
+            total += subtotal;
+            summaryText += `${item.name} x ${item.qty} = PKR ${subtotal}\n`;
+            return `
+                <div class="cart-item">
+                    <div>
+                        <div style="font-size:0.9rem">${item.name}</div>
+                        <div style="color:var(--gold); font-size:0.8rem">PKR ${item.price}</div>
+                    </div>
+                    <div class="qty-controls">
+                        <button onclick="changeQty(${item.id}, -1)">-</button>
+                        <span style="margin:0 10px">${item.qty}</span>
+                        <button onclick="changeQty(${item.id}, 1)">+</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        totalEl.innerText = `Total: PKR ${total}`;
+        summaryText += `------------------\nGRAND TOTAL: PKR ${total}`;
+        hiddenSummary.value = summaryText;
+    }
+
+    function saveCart() { localStorage.setItem('zakai_cart', JSON.stringify(cart)); }
+
+    function toggleCart() { document.getElementById('cart-modal').classList.toggle('active'); }
+
+    // Handle form submission
+    document.getElementById('order-form').onsubmit = function(e) {
+        if(cart.length === 0) {
+            alert("Cart is empty!");
+            return false;
+        }
+        // Formspree will handle the redirect. We just clear cart on load if we come back.
+    };
+
+    // Check for success redirect (Formspree usually redirects back with a query param)
+    window.onload = () => {
+        initProducts();
+        if (window.location.search.includes('success')) {
+            alert("Order placed! Zakai Chemicals will contact you on WhatsApp to confirm.");
+            cart = [];
+            saveCart();
+            updateCartUI();
+        }
+    };
+</script>
+
+</body>
+</html>
